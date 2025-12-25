@@ -22,50 +22,43 @@ class TennisGame1 implements TennisGame
     public function getScore(): string
     {
         $score = '';
+
         //in case of equity we don't have to proceed
         if ($this->m_score1 === $this->m_score2)
-            return $this->equialityConditionScore($this->m_score1);
+            return $this->getEquialityConditionScore($this->m_score1);
+
+        //case where any score is 4 or more
+        if ($this->m_score1 >= 4 || $this->m_score2 >= 4)
+            return $this->getAdvantageOrWinScore($this->m_score1, $this->m_score2);
 
 
-        elseif ($this->m_score1 >= 4 || $this->m_score2 >= 4) {
-            $minusResult = $this->m_score1 - $this->m_score2;
-            if ($minusResult === 1) {
-                $score = 'Advantage player1';
-            } elseif ($minusResult === -1) {
-                $score = 'Advantage player2';
-            } elseif ($minusResult >= 2) {
-                $score = 'Win for player1';
+        for ($i = 1; $i < 3; $i++) {
+            if ($i === 1) {
+                $tempScore = $this->m_score1;
             } else {
-                $score = 'Win for player2';
+                $score .= '-';
+                $tempScore = $this->m_score2;
             }
-        } else {
-            for ($i = 1; $i < 3; $i++) {
-                if ($i === 1) {
-                    $tempScore = $this->m_score1;
-                } else {
-                    $score .= '-';
-                    $tempScore = $this->m_score2;
-                }
-                switch ($tempScore) {
-                    case 0:
-                        $score .= 'Love';
-                        break;
-                    case 1:
-                        $score .= 'Fifteen';
-                        break;
-                    case 2:
-                        $score .= 'Thirty';
-                        break;
-                    case 3:
-                        $score .= 'Forty';
-                        break;
-                }
+            switch ($tempScore) {
+                case 0:
+                    $score .= 'Love';
+                    break;
+                case 1:
+                    $score .= 'Fifteen';
+                    break;
+                case 2:
+                    $score .= 'Thirty';
+                    break;
+                case 3:
+                    $score .= 'Forty';
+                    break;
             }
         }
+
         return $score;
     }
 
-    protected function equialityConditionScore($score): string
+    protected function getEquialityConditionScore($score): string
     {
         return match ($score) {
             0 => 'Love-All',
@@ -73,5 +66,15 @@ class TennisGame1 implements TennisGame
             2 => 'Thirty-All',
             default => 'Deuce',
         };
+    }
+
+    protected function getAdvantageOrWinScore($m_score1, $m_score2): string
+    {
+        return match ($minusResult = $m_score1 - $m_score2) {
+            1 => 'Advantage player1',
+            -1 => 'Advantage player2',
+            default => ($minusResult >= 2) ? 'Win for player1' : 'Win for player2',
+        };
+
     }
 }
