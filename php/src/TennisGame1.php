@@ -10,66 +10,61 @@ class TennisGame1 implements TennisGame
 
     private int $m_score2 = 0;
 
-    public function __construct(
-        private string $player1Name,
-        private string $player2Name
-    ) {
+    public function __construct()
+    {
     }
 
     public function wonPoint(string $playerName): void
     {
-        if ($playerName === 'player1') {
-            $this->m_score1++;
-        } else {
-            $this->m_score2++;
-        }
+        $playerName === 'player1' ? $this->m_score1++ : $this->m_score2++;
     }
 
     public function getScore(): string
     {
-        $score = '';
-        if ($this->m_score1 === $this->m_score2) {
-            $score = match ($this->m_score1) {
-                0 => 'Love-All',
-                1 => 'Fifteen-All',
-                2 => 'Thirty-All',
-                default => 'Deuce',
-            };
-        } elseif ($this->m_score1 >= 4 || $this->m_score2 >= 4) {
-            $minusResult = $this->m_score1 - $this->m_score2;
-            if ($minusResult === 1) {
-                $score = 'Advantage player1';
-            } elseif ($minusResult === -1) {
-                $score = 'Advantage player2';
-            } elseif ($minusResult >= 2) {
-                $score = 'Win for player1';
-            } else {
-                $score = 'Win for player2';
-            }
-        } else {
-            for ($i = 1; $i < 3; $i++) {
-                if ($i === 1) {
-                    $tempScore = $this->m_score1;
-                } else {
-                    $score .= '-';
-                    $tempScore = $this->m_score2;
-                }
-                switch ($tempScore) {
-                    case 0:
-                        $score .= 'Love';
-                        break;
-                    case 1:
-                        $score .= 'Fifteen';
-                        break;
-                    case 2:
-                        $score .= 'Thirty';
-                        break;
-                    case 3:
-                        $score .= 'Forty';
-                        break;
-                }
-            }
-        }
-        return $score;
+        //in case of equity we don't have to proceed
+        if ($this->m_score1 === $this->m_score2)
+            return $this->getEquialityConditionScore($this->m_score1);
+
+        //case where any score is 4 or more
+        if ($this->m_score1 >= 4 || $this->m_score2 >= 4)
+            return $this->getAdvantageOrWinScore($this->m_score1, $this->m_score2);
+
+        //case where the score is 3 or less
+        return $this->getBoardScore($this->m_score1, $this->m_score2);
+    }
+
+    protected function getEquialityConditionScore($score): string
+    {
+        return match ($score) {
+            0 => 'Love-All',
+            1 => 'Fifteen-All',
+            2 => 'Thirty-All',
+            default => 'Deuce',
+        };
+    }
+
+    protected function getAdvantageOrWinScore($m_score1, $m_score2): string
+    {
+        return match ($minusResult = $m_score1 - $m_score2) {
+            1 => 'Advantage player1',
+            -1 => 'Advantage player2',
+            default => ($minusResult >= 2) ? 'Win for player1' : 'Win for player2',
+        };
+
+    }
+
+    protected function getScoreStringValue($tempScore): string
+    {
+        return match ($tempScore) {
+            0 => 'Love',
+            1 => 'Fifteen',
+            2 => 'Thirty',
+            3 => 'Forty',
+        };
+    }
+
+    protected function getBoardScore($m_score1, $m_score2): string
+    {
+        return $this->getScoreStringValue($m_score1) . '-' . $this->getScoreStringValue($m_score2);
     }
 }
